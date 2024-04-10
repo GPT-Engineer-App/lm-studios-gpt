@@ -27,13 +27,25 @@ const Index = () => {
 
     setLoading(true);
     try {
-      // TODO: Integrate with LM Studios API to get response
-      // Simulating API call with timeout for demo purposes
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await fetch("http://localhost:1234/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "TheBloke/CodeLlama-13B-Instruct-GGUF/codellama-13b-instruct.Q8_0.gguf",
+          prompt: inputText,
+        }),
+      });
 
-      const response = "Here is the code generated based on your prompt:\n\n" + "```js\nconst getCurrentTime = () => {\n" + "  const now = new Date();\n" + "  return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;\n" + "};\n```";
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
 
-      setOutputText(response);
+      const data = await response.json();
+      const generatedCode = data.choices[0].text;
+
+      setOutputText(generatedCode);
     } catch (error) {
       console.error("Error:", error);
       toast({
